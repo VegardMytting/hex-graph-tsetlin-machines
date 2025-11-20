@@ -31,11 +31,11 @@ else:
 print("Dataset ready.")
 
 games_train, games_temp, y_train, y_temp = train_test_split(
-    games, Y, test_size=0.3, shuffle=True, random_state=66
+  games, Y, test_size=0.3, shuffle=True, random_state=66
 )
 
 games_val, games_test, y_val, y_test = train_test_split(
-    games_temp, y_temp, test_size=0.5, shuffle=True, random_state=66
+  games_temp, y_temp, test_size=0.5, shuffle=True, random_state=66
 )
 
 print("Converting training graphs...")
@@ -49,10 +49,10 @@ G_test = hex_to_graphs(games_test)
 
 print("Training GTM...")
 tm = GraphTsetlinMachine(
-    number_of_clauses=300,
-    T=50,
-    s=25.0,
-    depth=1
+  number_of_clauses=300,
+  T=50,
+  s=25.0,
+  depth=1
 )
 tm.fit(G_train, y_train)
 
