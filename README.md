@@ -1,1 +1,0 @@
-# hex-graph-tsetlin-machines
