@@ -350,7 +350,7 @@ int main(void) {
     reconstruct_board(temp_board, hg.moves, total_moves);
     write_board_csv(f_final, temp_board, winner);
 
-    if (total_moves >= 1) {
+    if (total_moves >= 2) {
       reconstruct_board(temp_board, hg.moves, total_moves - 2);
       write_board_csv(f_m2, temp_board, winner);
     }
