@@ -1078,7 +1078,7 @@ class GraphTsetlinMachine(CommonTsetlinMachine):
 		)
 		self.negative_clauses = 1
 
-	def fit(self, graphs, Y):
+	def fit(self, graphs, Y, epochs=5, incremental=False):
 		self.number_of_outputs = 1
 		
 		self.max_y = None
@@ -1086,7 +1086,7 @@ class GraphTsetlinMachine(CommonTsetlinMachine):
 		
 		encoded_Y = np.where(Y == 1, self.T, -self.T).astype(np.int32)
 
-		self._fit(graphs, encoded_Y)
+		self._fit(graphs, encoded_Y, epochs=epochs, incremental=incremental)
 
 		return
 
