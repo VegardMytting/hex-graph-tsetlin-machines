@@ -1,5 +1,4 @@
 from graphs import Graphs
-import numpy as np
 from tqdm import tqdm
 
 DIRS = [(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0)]
@@ -58,7 +57,7 @@ def csv_to_graphs(df, board_size, hypervector_size=128):
         val = board_values[r][c]
         if val == 1:
           G.add_graph_node_property(gid, f"{src}", "red")
-        elif val == 0:
+        elif val == -1:
           G.add_graph_node_property(gid, f"{src}", "blue")
         else:
           G.add_graph_node_property(gid, f"{src}", "empty")
