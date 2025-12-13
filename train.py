@@ -10,28 +10,30 @@ BOARD_SIZE = 7
 number_of_clauses_choice = int(inquirer.number(
   message="Choose Number of Clauses:",
   min_allowed=1,
-  default=100
+  default=5000
 ).execute())
 
 T_choice = int(inquirer.number(
   message="Choose T:",
   min_allowed=1,
+  default=5000
 ).execute())
 
 s_choice = float(inquirer.number(
   message="Choose s:",
   min_allowed=1,
   max_allowed=25,
+  default = 5,
 ).execute())
 
 depth_choice = int(inquirer.number(
   message="Choose Depth:",
   min_allowed=1,
-  default=3
+  default=1
 ).execute())
 
 #Les bare første N rader for rask test
-FAST_N = 20000
+FAST_N = 1000000
 # Les data fra data-mappen 
 df = pd.read_csv("data/hex_games_1_000_000_size_7.csv", nrows=FAST_N)
 
@@ -41,6 +43,12 @@ vals = df.drop(columns=["winner"]).to_numpy().ravel()
 print("Cell min/max: ", vals.min(), vals.max())
 print("Unique cell values (sample):", np.unique(vals)[:10])
 print("Winner distribution:\n", df["winner"].value_counts())
+
+epochs_choice = int(inquirer.number(
+  message="Choose Epochs:",
+  min_allowed=1,
+  default=10
+).execute())
 
 # Label: gjør til uint32 og sørg for numpy ved sammenligning
 Y = (df["winner"] == 1).astype(np.uint32)
@@ -54,9 +62,9 @@ X_val, X_test, y_val, y_test = train_test_split(
   X_temp, y_temp, test_size=0.5, shuffle=True, random_state=66
 )
 
-TRAIN_CAP = 15000
-VAL_CAP = 2500
-TEST_CAP = 2500
+TRAIN_CAP = 200000
+VAL_CAP = 20000
+TEST_CAP = 20000
 
 X_train = X_train.iloc[:TRAIN_CAP]
 y_train = y_train.iloc[:TRAIN_CAP]
@@ -69,6 +77,11 @@ y_test = y_test.iloc[:TEST_CAP]
 y_train_np = y_train.to_numpy(dtype=np.uint32)
 y_val_np   = y_val.to_numpy(dtype=np.uint32)
 y_test_np  = y_test.to_numpy(dtype=np.uint32)
+
+baseline_val  = max((y_val_np == 0).mean(),  (y_val_np == 1).mean())
+baseline_test = max((y_test_np == 0).mean(), (y_test_np == 1).mean())
+print("Baseline VAL:", baseline_val)
+print("Baseline TEST:", baseline_test)
 
 # Bygg grafene
 # - Train lager ny random hypervector mapping
@@ -84,7 +97,7 @@ tm = GraphTsetlinMachine(
   depth=depth_choice
 )
 # Tren
-tm.fit(G_train, y_train.to_numpy(dtype=np.uint32), epochs=3)
+tm.fit(G_train, y_train_np, epochs=epochs_choice)
 
 # Evaluer robust (numpy på begge sider)
 pred_val = tm.predict(G_val).astype(np.uint32)

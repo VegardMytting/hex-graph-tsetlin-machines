@@ -63,7 +63,7 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
             G.add_graph_node_edge(gid, f"{src}", f"{dst}", "adj")
             
         # Legg inn node-feature (SYMBOL) basert på cellenes verdi
-        val = board_values[r][c]
+        val = int(board_values[r][c])
 
         # Her må det matche datasettets encoding.
         # Vanligst er 0 = empty, 1 = player 1, 2 = player 2
