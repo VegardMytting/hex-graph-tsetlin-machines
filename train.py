@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from converter import csv_to_graphs
-from tm import GraphTsetlinMachine
+from tm import MultiClassGraphTsetlinMachine
 import numpy as np
 from InquirerPy import inquirer
 
@@ -50,8 +50,19 @@ epochs_choice = int(inquirer.number(
   default=10
 ).execute())
 
-# Label: gjør til uint32 og sørg for numpy ved sammenligning
-Y = (df["winner"] == 1).astype(np.uint32)
+# Label: lag klasse-id 0/1 (MultiClass forventer class IDs)
+w = df["winner"].to_numpy()
+
+uniq = set(np.unique(w))
+if uniq.issubset({-1, 1}):
+    # -1 -> 0, 1 -> 1
+    Y = (w == 1).astype(np.uint32)
+elif uniq.issubset({1, 2}):
+    # 1 -> 0, 2 -> 1 (evt. bytt hvis du vil motsatt)
+    Y = (w == 2).astype(np.uint32)
+else:
+    raise ValueError(f"Unexpected winner encoding: {sorted(list(uniq))[:10]}")
+
 board_df = df.drop(columns=["winner"])
 
 X_train, X_temp, y_train, y_temp = train_test_split(
@@ -90,12 +101,13 @@ G_train = csv_to_graphs(X_train, BOARD_SIZE)
 G_val = csv_to_graphs(X_val, BOARD_SIZE, init_with=G_train)
 G_test = csv_to_graphs(X_test, BOARD_SIZE, init_with=G_train)
 
-tm = GraphTsetlinMachine(
+tm = MultiClassGraphTsetlinMachine(
   number_of_clauses=number_of_clauses_choice,
   T=T_choice,
   s=s_choice,
   depth=depth_choice
 )
+
 # Tren
 tm.fit(G_train, y_train_np, epochs=epochs_choice)
 
@@ -112,4 +124,5 @@ print("VAL pred dist  :", np.bincount(pred_val, minlength=2) / pred_val.size)
 print("VAL label dist :", np.bincount(y_val_np, minlength=2) / y_val_np.size)
 print("TEST pred dist :", np.bincount(pred_test, minlength=2) / pred_test.size)
 print("TEST label dist:", np.bincount(y_test_np, minlength=2) / y_test_np.size)
+
 
