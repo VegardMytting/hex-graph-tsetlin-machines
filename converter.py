@@ -44,6 +44,7 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
         # Celleverdi
         val = int(board_values[r][c])
 
+'''
         # Node-type basert på celleverdi
         if val == 0:
             node_type = "empty_cell"
@@ -61,6 +62,9 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
             if 0 <= rr < N and 0 <= cc < N:
                 deg += 1
 
+        G.add_graph_node(gid, f"{idx}", deg, node_type)
+'''
+        node_type = f"pos_{idx}"
         G.add_graph_node(gid, f"{idx}", deg, node_type)
             
 
