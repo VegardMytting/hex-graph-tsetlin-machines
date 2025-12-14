@@ -10,7 +10,7 @@ DIRS = {
   (1, 0): "SE",
 }
 
-def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
+def csv_to_graphs(df, board_size, hypervector_size=512, init_with=None):
   symbols = ["empty", "red", "blue"]
 
   G = Graphs(

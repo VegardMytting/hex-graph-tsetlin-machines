@@ -73,9 +73,20 @@ X_val, X_test, y_val, y_test = train_test_split(
   X_temp, y_temp, test_size=0.5, shuffle=True, random_state=66
 )
 
-TRAIN_CAP = 200000
-VAL_CAP = 20000
-TEST_CAP = 20000
+TRAIN_CAP = 20000
+VAL_CAP = 2000
+TEST_CAP = 2000
+
+
+G_val_small  = csv_to_graphs(X_val.iloc[:VAL_EVAL],  BOARD_SIZE, init_with=G_train)
+G_test_small = csv_to_graphs(X_test.iloc[:TEST_EVAL], BOARD_SIZE, init_with=G_train)
+
+pred_val_small  = tm.predict(G_val_small).astype(np.uint32)
+pred_test_small = tm.predict(G_test_small).astype(np.uint32)
+
+print("VAL small:", (pred_val_small == y_val_np[:VAL_EVAL]).mean())
+print("TEST small:", (pred_test_small == y_test_np[:TEST_EVAL]).mean())
+
 
 X_train = X_train.iloc[:TRAIN_CAP]
 y_train = y_train[:TRAIN_CAP]
