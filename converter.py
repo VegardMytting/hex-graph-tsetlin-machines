@@ -88,14 +88,14 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
 
         # Her må det matche datasettets encoding.
         # Vanligst er 0 = empty, 1 = player 1, 2 = player 2
-       # if val == 0:
-         # G.add_graph_node_property(gid, f"{src}", "empty")
-        #elif val == 1:
-         # G.add_graph_node_property(gid, f"{src}", "red")
-        #elif val == -1:
-          #G.add_graph_node_property(gid, f"{src}", "blue")
-        #else:
-          #raise ValueError(f"Unexpected cell value: {val}")
+        if val == 0:
+          G.add_graph_node_property(gid, f"{src}", "empty")
+        elif val == 1:
+          G.add_graph_node_property(gid, f"{src}", "red")
+        elif val == -1:
+          G.add_graph_node_property(gid, f"{src}", "blue")
+        else:
+          raise ValueError(f"Unexpected cell value: {val}")
 
   print("Encoding GTM graphs...")
   G.encode()
