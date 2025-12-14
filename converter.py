@@ -41,30 +41,14 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
       for c in range(N):
         idx = r * N + c
 
-        # Celleverdi
-        val = int(board_values[r][c])
+        node_type =f"pos_{idx}"
 
-'''
-        # Node-type basert på celleverdi
-        if val == 0:
-            node_type = "empty_cell"
-        elif val == 1:
-            node_type = "red_cell"
-        elif val == -1:
-            node_type = "blue_cell"
-        else:
-            raise ValueError(f"Unexpected cell value: {val}")
-
-        # Beregn antall naboer
         deg = 0
-        for dr, dc in DIRS:
-            rr, cc = r + dr, c + dc
-            if 0 <= rr < N and 0 <= cc < N:
-                deg += 1
+        for (dr, dc) in DIRS.keys():
+          rr, cc = r + dr, c + dc
+          if 0 <= rr < N and 0 <= cc < N:
+            deg += 1
 
-        G.add_graph_node(gid, f"{idx}", deg, node_type)
-'''
-        node_type = f"pos_{idx}"
         G.add_graph_node(gid, f"{idx}", deg, node_type)
             
 
