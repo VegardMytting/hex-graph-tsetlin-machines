@@ -38,7 +38,7 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
     board_values = row.to_numpy(dtype=int).reshape(N, N)
 
     for r in range(N):
-    for c in range(N):
+      for c in range(N):
         idx = r * N + c
 
         # Celleverdi
@@ -78,10 +78,10 @@ def csv_to_graphs(df, board_size, hypervector_size=128, init_with=None):
         
         # Legg inn alle nabokanter
         for (dr, dc), etype in DIRS.items():
-        rr, cc = r+dr, c+dc
+          rr, cc = r+dr, c+dc
           if 0 <= rr < N and 0 <= cc < N:
-          dst = rr * N + cc
-          G.add_graph_node_edge(gid, f"{src}", f"{dst}", etype)
+            dst = rr * N + cc
+            G.add_graph_node_edge(gid, f"{src}", f"{dst}", etype)
             
         # Legg inn node-feature (SYMBOL) basert på cellenes verdi
         val = int(board_values[r][c])

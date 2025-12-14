@@ -78,16 +78,16 @@ VAL_CAP = 20000
 TEST_CAP = 20000
 
 X_train = X_train.iloc[:TRAIN_CAP]
-y_train = y_train.iloc[:TRAIN_CAP]
+y_train = y_train[:TRAIN_CAP]
 X_val = X_val.iloc[:VAL_CAP]
-y_val = y_val.iloc[:VAL_CAP]
+y_val = y_val[:VAL_CAP]
 X_test = X_test.iloc[:TEST_CAP]
-y_test = y_test.iloc[:TEST_CAP]
+y_test = y_test[:TEST_CAP]
 
 
-y_train_np = y_train.to_numpy(dtype=np.uint32)
-y_val_np   = y_val.to_numpy(dtype=np.uint32)
-y_test_np  = y_test.to_numpy(dtype=np.uint32)
+y_train_np = np.asarray(y_train, dtype=np.uint32)
+y_val_np   = np.asarray(y_val, dtype=np.uint32)
+y_test_np  = np.asarray(y_test, dtype=np.uint32)
 
 baseline_val  = max((y_val_np == 0).mean(),  (y_val_np == 1).mean())
 baseline_test = max((y_test_np == 0).mean(), (y_test_np == 1).mean())
