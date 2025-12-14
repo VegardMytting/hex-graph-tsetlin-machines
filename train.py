@@ -77,20 +77,6 @@ TRAIN_CAP = 20000
 VAL_CAP = 2000
 TEST_CAP = 2000
 
-VAL_EVAL = 2000
-TEST_EVAL = 2000
-
-
-G_val_small  = csv_to_graphs(X_val.iloc[:VAL_EVAL],  BOARD_SIZE, init_with=G_train)
-G_test_small = csv_to_graphs(X_test.iloc[:TEST_EVAL], BOARD_SIZE, init_with=G_train)
-
-pred_val_small  = tm.predict(G_val_small).astype(np.uint32)
-pred_test_small = tm.predict(G_test_small).astype(np.uint32)
-
-print("VAL small:", (pred_val_small == y_val_np[:VAL_EVAL]).mean())
-print("TEST small:", (pred_test_small == y_test_np[:TEST_EVAL]).mean())
-
-
 X_train = X_train.iloc[:TRAIN_CAP]
 y_train = y_train[:TRAIN_CAP]
 X_val = X_val.iloc[:VAL_CAP]
@@ -124,6 +110,19 @@ tm = MultiClassGraphTsetlinMachine(
 
 # Tren
 tm.fit(G_train, y_train_np, epochs=epochs_choice)
+
+
+VAL_EVAL = min(2000, len(X_val))
+TEST_EVAL = min_(2000, len(X_test))
+
+G_val_small  = csv_to_graphs(X_val.iloc[:VAL_EVAL],  BOARD_SIZE, hypervector_size=512,init_with=G_train)
+G_test_small = csv_to_graphs(X_test.iloc[:TEST_EVAL], BOARD_SIZE, hypervector_size=512, init_with=G_train)
+
+pred_val_small  = tm.predict(G_val_small).astype(np.uint32)
+pred_test_small = tm.predict(G_test_small).astype(np.uint32)
+
+print("VAL small:", (pred_val_small == y_val_np[:VAL_EVAL]).mean())
+print("TEST small:", (pred_test_small == y_test_np[:TEST_EVAL]).mean())
 
 # ---- Rask evaluering på lite subset ----
 VAL_EVAL = min(2000, len(X_val))
