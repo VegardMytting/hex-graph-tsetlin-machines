@@ -97,9 +97,9 @@ print("Baseline TEST:", baseline_test)
 # Bygg grafene
 # - Train lager ny random hypervector mapping
 # - Val/test gjenbruker train sin mapping (kritisk)
-G_train = csv_to_graphs(X_train, BOARD_SIZE)
-G_val = csv_to_graphs(X_val, BOARD_SIZE, init_with=G_train)
-G_test = csv_to_graphs(X_test, BOARD_SIZE, init_with=G_train)
+G_train = csv_to_graphs(X_train, BOARD_SIZE, hypervector_size=512)
+G_val   = csv_to_graphs(X_val, BOARD_SIZE, hypervector_size=512, init_with=G_train)
+G_test  = csv_to_graphs(X_test, BOARD_SIZE, hypervector_size=512, init_with=G_train)
 
 tm = MultiClassGraphTsetlinMachine(
   number_of_clauses=number_of_clauses_choice,
