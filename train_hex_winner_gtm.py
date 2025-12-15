@@ -365,8 +365,27 @@ def train_and_eval_for_snap(
     tm.fit(graphs_train, y_train, epochs=epochs, incremental=False)
     preds = tm.predict(graphs_test)
 
+    # Confusion matrix for binary classes: 0=P1, 1=P2
+    cm = np.zeros((2, 2), dtype=np.int64)
+    for yt, yp in zip(y_test, preds):
+        cm[int(yt), int(yp)] += 1
+
+    # Distributions
+    true_counts = np.bincount(y_test.astype(np.int64), minlength=2)
+    pred_counts = np.bincount(preds.astype(np.int64), minlength=2)
+
     acc = float(np.mean(preds == y_test))
+
+    print(f"[snap={snap}] accuracy={acc:.4f}")
+    print(f"[snap={snap}] true counts:  P1={true_counts[0]}  P2={true_counts[1]}")
+    print(f"[snap={snap}] pred counts:  P1={pred_counts[0]}  P2={pred_counts[1]}")
+    print(f"[snap={snap}] confusion matrix (rows=true, cols=pred):")
+    print("           pred P1   pred P2")
+    print(f"true P1    {cm[0,0]:7d}  {cm[0,1]:7d}")
+    print(f"true P2    {cm[1,0]:7d}  {cm[1,1]:7d}")
+
     return acc, tm
+
 
 
 def main():
