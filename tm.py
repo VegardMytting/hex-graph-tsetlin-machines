@@ -26,7 +26,7 @@ import sys
 
 import numpy as np
 
-import kernels as kernels
+import GraphTsetlinMachine.kernels as kernels
 
 import pycuda.curandom as curandom
 import pycuda.driver as cuda
@@ -35,8 +35,6 @@ from pycuda.compiler import SourceModule
 from scipy.sparse import csr_matrix
 import sys
 from time import time
-
-from tqdm import tqdm
 
 g = curandom.XORWOWRandomNumberGenerator() 
 
@@ -514,29 +512,11 @@ class CommonTsetlinMachine():
 		self.transform_nodewise_gpu = mod_transform.get_function("transform_nodewise")
 		self.transform_nodewise_gpu.prepare("PiP")
 
-		# mod_clauses = SourceModule(parameters + kernels.code_header + kernels.code_clauses, no_extern_c=True)
-		# self.get_ta_states_gpu = mod_clauses.get_function("get_ta_states")
-		# self.get_ta_states_gpu.prepare("PiiP")
-		# self.get_hyperliterals_gpu = mod_clauses.get_function("get_hyperliterals")
-		# self.get_hyperliterals_gpu.prepare("PiiP")
 		mod_clauses = SourceModule(parameters + kernels.code_header + kernels.code_clauses, no_extern_c=True)
-
-# get_ta_states
-		try:
-				self.get_ta_states_gpu = mod_clauses.get_function("get_ta_states")
-				self.get_ta_states_gpu.prepare("PiiP")
-		except cuda.LogicError as e:
-				print("WARNING: get_ta_states kernel not available:", e)
-				self.get_ta_states_gpu = None
-
-		# get_hyperliterals
-		try:
-				self.get_hyperliterals_gpu = mod_clauses.get_function("get_hyperliterals")
-				self.get_hyperliterals_gpu.prepare("PiiP")
-		except cuda.LogicError as e:
-				print("WARNING: get_hyperliterals kernel not available:", e)
-				self.get_hyperliterals_gpu = None
-
+		self.get_ta_states_gpu = mod_clauses.get_function("get_ta_states")
+		self.get_ta_states_gpu.prepare("PiiP")
+		self.get_hyperliterals_gpu = mod_clauses.get_function("get_hyperliterals")
+		self.get_hyperliterals_gpu.prepare("PiiP")
 
 	def _init_fit(self, graphs, encoded_Y, incremental):
 		if not self.initialized:
@@ -691,8 +671,8 @@ class CommonTsetlinMachine():
 		self._init_fit(graphs, encoded_Y, incremental)
 
 		class_sum = np.zeros(self.number_of_outputs).astype(np.int32)
-		for epoch in tqdm(range(epochs), desc="Epochs"):
-			for e in tqdm(range(graphs.number_of_graphs), desc="Graphs", leave=False):
+		for epoch in range(epochs):
+			for e in range(graphs.number_of_graphs):
 				class_sum[:] = 0
 				cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
@@ -1078,7 +1058,7 @@ class GraphTsetlinMachine(CommonTsetlinMachine):
 		)
 		self.negative_clauses = 1
 
-	def fit(self, graphs, Y, epochs=5, incremental=False):
+	def fit(self, graphs, Y):
 		self.number_of_outputs = 1
 		
 		self.max_y = None
@@ -1086,7 +1066,7 @@ class GraphTsetlinMachine(CommonTsetlinMachine):
 		
 		encoded_Y = np.where(Y == 1, self.T, -self.T).astype(np.int32)
 
-		self._fit(graphs, encoded_Y, epochs=epochs, incremental=incremental)
+		self._fit(graphs, encoded_Y)
 
 		return
 
