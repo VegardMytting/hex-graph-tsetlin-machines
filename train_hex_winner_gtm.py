@@ -317,6 +317,7 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                     if snap in (2, 5):
                         graphs.add_graph_node_edge(gid, src_name, dst_name, "ADJ")
 
+    graphs.encode()
     return graphs
 
 
