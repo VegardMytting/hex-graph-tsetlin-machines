@@ -1,23 +1,4 @@
-// // Copyright (c) 2024 Ole-Christoffer Granmo
-
-// // Permission is hereby granted, free of charge, to any person obtaining a copy
-// // of this software and associated documentation files (the "Software"), to deal
-// // in the Software without restriction, including without limitation the rights
-// // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// // copies of the Software, and to permit persons to whom the Software is
-// // furnished to do so, subject to the following conditions:
-
-// // The above copyright notice and this permission notice shall be included in all
-// // copies or substantial portions of the Software.
-
-// // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// // SOFTWARE.
-
+// Copyright (c) 2024 Ole-Christoffer Granmo
 // Modified for CSV dataset generation
 
 #include <stdio.h>
@@ -35,7 +16,7 @@
 #endif
 
 #ifndef BOARD_DIM
-#define BOARD_DIM 3
+#define BOARD_DIM 5
 #endif
 
 #ifndef NUM_GAMES
@@ -75,7 +56,7 @@ void hg_init(struct hex_game *hg) {
 int hg_connect(struct hex_game *hg, int player, int position) {
   hg->connected[position*2 + player] = 1;
   
-	if (player == 0 && position / (BOARD_DIM + 2) == BOARD_DIM)
+  if (player == 0 && position / (BOARD_DIM + 2) == BOARD_DIM)
     return 1;
   if (player == 1 && position % (BOARD_DIM + 2) == BOARD_DIM)
     return 1;
@@ -155,9 +136,7 @@ int main(void) {
   char file_m5[256];
 
   snprintf(file_final, sizeof(file_final), "data/hex_%dx%d_%d_final.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
-
   snprintf(file_m2, sizeof(file_m2), "data/hex_%dx%d_%d_minus2.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
-
   snprintf(file_m5, sizeof(file_m5), "data/hex_%dx%d_%d_minus5.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
 
   FILE *f_final = fopen(file_final, "w");
@@ -176,7 +155,13 @@ int main(void) {
   struct hex_game hg;
   int temp_board[(BOARD_DIM+2)*(BOARD_DIM+2)*2];
 
+  printf("Generating %d games for %dx%d board...\n", NUM_GAMES, BOARD_DIM, BOARD_DIM);
+
   for (int g = 0; g < NUM_GAMES; ++g) {
+    if (g % 10000 == 0) {
+      printf("Generated %d/%d games (%.1f%%)\n", g, NUM_GAMES, 100.0*g/NUM_GAMES);
+    }
+
     hg_init(&hg);
 
     int winner = 0;
@@ -188,8 +173,8 @@ int main(void) {
       total_moves++;
 
       if (hg_winner(&hg, player, pos)) {
- 				winner = (player == 0) ? 1 : -1;
- 				break;
+        winner = (player == 0) ? 1 : -1;
+        break;
       }
 
       player = 1 - player;
@@ -198,7 +183,7 @@ int main(void) {
     reconstruct_board(temp_board, hg.moves, total_moves);
     write_board_csv(f_final, temp_board, winner);
 
-    if (total_moves >= 1) {
+    if (total_moves >= 2) {
       reconstruct_board(temp_board, hg.moves, total_moves - 2);
       write_board_csv(f_m2, temp_board, winner);
     }
@@ -212,6 +197,12 @@ int main(void) {
   fclose(f_final);
   fclose(f_m2);
   fclose(f_m5);
+
+  printf("\n✓ Successfully generated all datasets!\n");
+  printf("Files created in data/ directory:\n");
+  printf("  - %s\n", file_final);
+  printf("  - %s\n", file_m2);
+  printf("  - %s\n", file_m5);
 
   return 0;
 }

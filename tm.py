@@ -26,7 +26,7 @@ import sys
 
 import numpy as np
 
-import GraphTsetlinMachine.kernels as kernels
+import kernels as kernels
 
 import pycuda.curandom as curandom
 import pycuda.driver as cuda
@@ -691,8 +691,8 @@ class CommonTsetlinMachine():
 		self._init_fit(graphs, encoded_Y, incremental)
 
 		class_sum = np.zeros(self.number_of_outputs).astype(np.int32)
-		for epoch in tqdm(range(epochs), desc="Epochs"):
-			for e in tqdm(range(graphs.number_of_graphs), desc="Graphs", leave=False):
+		for epoch in tqdm(range(epochs), desc=("epoch" if epochs == 1 else "epochs"), leave=False, disable=(True if epochs <= 1 else False)):
+			for e in tqdm(range(graphs.number_of_graphs), desc="training...", leave=False):
 				class_sum[:] = 0
 				cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
