@@ -178,22 +178,6 @@ def generate_balanced_games_from_hex_c(exe_path: str, n_total: int) -> List[Game
     return balanced[:n_total]
 
 
-    games: List[GameSample] = []
-    for line in proc.stdout.strip().splitlines():
-        parts = line.strip().split(",")
-        if len(parts) < 2:
-            continue
-
-        winner_c = int(parts[0])         # 0 eller 1 fra C
-        moves = [int(x) for x in parts[1:]]
-        # map winner to your Python convention: 1=P1, 2=P2
-        winner_py = 1 if winner_c == 0 else 2
-
-        games.append(GameSample(moves=moves, winner=winner_py, end_len=len(moves)))
-
-    return games
-
-
 def generate_random_game(size: int, rng: random.Random) -> GameSample:
     cells = list(range(size * size))
     rng.shuffle(cells)
