@@ -150,6 +150,34 @@ def generate_games_from_hex_c(exe_path: str, n_games: int) -> List[GameSample]:
         text=True
     )
 
+    def generate_balanced_games_from_hex_c(exe_path: str, n_total: int) -> List[GameSample]:
+    """
+    Generate approximately balanced set of games: ~n_total/2 P1 wins and ~n_total/2 P2 wins.
+    """
+    target = n_total // 2
+    p1: List[GameSample] = []
+    p2: List[GameSample] = []
+
+    # Generate in batches to reduce subprocess overhead
+    batch = max(200, n_total)
+
+    while len(p1) < target or len(p2) < target:
+        games = generate_games_from_hex_c(exe_path, batch)
+        for g in games:
+            if g.winner == 1 and len(p1) < target:
+                p1.append(g)
+            elif g.winner == 2 and len(p2) < target:
+                p2.append(g)
+            if len(p1) >= target and len(p2) >= target:
+                break
+
+    balanced = p1 + p2
+    random.shuffle(balanced)
+
+    # If n_total is odd, add one more random game (or just trim)
+    return balanced[:n_total]
+
+
     games: List[GameSample] = []
     for line in proc.stdout.strip().splitlines():
         parts = line.strip().split(",")
@@ -386,8 +414,9 @@ def train_and_eval_for_snap(
     rng = random.Random(seed + snap)
 
     # Generate games
-    train_games = generate_games_from_hex_c("./hex5", n_train)
-    test_games = generate_games_from_hex_c("./hex5", n_test)
+    train_games = generate_balanced_games_from_hex_c("./hex5", n_train)
+    test_games = generate_balanced_games_from_hex_c("./hex5", n_test)
+
 
 
     # Build boards at snap
