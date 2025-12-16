@@ -295,8 +295,8 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                 src_idx = r * size + c
                 src_v = int(board[src_idx])
 
-            # Node properties (ALL snaps)
-            # ---------------------------
+                # Node properties (ALL snaps)
+                # ---------------------------
 
                 # Occupancy (ALL snaps)
                 if src_v == 0:
@@ -362,26 +362,7 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                     if add_adj:
                         graphs.add_graph_node_edge(gid, src_name, dst_name, "ADJ")
 
-
-                    # ALWAYS add occupancy and border info
-                    if src_v == 0:
-                        graphs.add_graph_node_property(gid, src_name, "EMPTY")
-                    elif src_v == 1:
-                        graphs.add_graph_node_property(gid, src_name, "P1")
-                    else:
-                        graphs.add_graph_node_property(gid, src_name, "P2")
-
-                    # Borders (critical for Hex)
-                    if r == 0:
-                        graphs.add_graph_node_property(gid, src_name, "TOP")
-                    if r == size - 1:
-                        graphs.add_graph_node_property(gid, src_name, "BOTTOM")
-                    if c == 0:
-                        graphs.add_graph_node_property(gid, src_name, "LEFT")
-                    if c == size - 1:
-                        graphs.add_graph_node_property(gid, src_name, "RIGHT")
-
-                        return graphs
+                    
 
     graphs.encode()
     return graphs
