@@ -150,7 +150,7 @@ def generate_games_from_hex_c(exe_path: str, n_games: int) -> List[GameSample]:
         text=True
     )
 
-    def generate_balanced_games_from_hex_c(exe_path: str, n_total: int) -> List[GameSample]:
+def generate_balanced_games_from_hex_c(exe_path: str, n_total: int) -> List[GameSample]:
     """
     Generate approximately balanced set of games: ~n_total/2 P1 wins and ~n_total/2 P2 wins.
     """
