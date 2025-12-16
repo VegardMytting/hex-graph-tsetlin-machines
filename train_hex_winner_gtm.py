@@ -2,7 +2,7 @@ import argparse
 import random
 from dataclasses import dataclass
 from typing import List, Tuple, Dict
-
+import subprocess
 import numpy as np
 
 # --- Important: tm.py imports GraphTsetlinMachine.kernels, but you currently have kernels.py in the same folder.
@@ -142,6 +142,29 @@ class GameSample:
     winner: int
     end_len: int  # number of moves until game ended (inclusive of winning move)
 
+def generate_games_from_hex_c(exe_path: str, n_games: int) -> List[GameSample]:
+    proc = subprocess.run(
+        [exe_path, str(n_games)],
+        check=True,
+        capture_output=True,
+        text=True
+    )
+
+    games: List[GameSample] = []
+    for line in proc.stdout.strip().splitlines():
+        parts = line.strip().split(",")
+        if len(parts) < 2:
+            continue
+
+        winner_c = int(parts[0])         # 0 eller 1 fra C
+        moves = [int(x) for x in parts[1:]]
+        # map winner to your Python convention: 1=P1, 2=P2
+        winner_py = 1 if winner_c == 0 else 2
+
+        games.append(GameSample(moves=moves, winner=winner_py, end_len=len(moves)))
+
+    return games
+
 
 def generate_random_game(size: int, rng: random.Random) -> GameSample:
     cells = list(range(size * size))
@@ -194,12 +217,15 @@ def _symbols_for_snap(size: int, snap: int) -> List[str]:
     # For snap=0 we still include them so we can add extra node properties later if desired.
     symbols += ["P1", "P2", "EMPTY"]
 
-    if snap in (2, 5):
-        # positional properties
-        symbols += [f"ROW_{r}" for r in range(size)]
-        symbols += [f"COL_{c}" for c in range(size)]
+    #Viktig for Hex: sidene må være observerbare
+    symbols += ["TOP", "BOTTOM", "LEFT", "RIGHT"]
 
-        # local neighbor stats (0..6 in Hex)
+
+    # På 5x5 anbefaler jeg posisjon også for snap=0
+    symbols += [f"ROW_{r}" for r in range(size)]
+    symbols += [f"COL_{c}" for c in range(size)]
+
+    if snap in (2, 5):
         for k in range(7):
             symbols += [f"N_P1_{k}", f"N_P2_{k}", f"N_E_{k}"]
 
@@ -267,19 +293,33 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                 src_idx = r * size + c
                 src_v = int(board[src_idx])
 
-                # snap>=2/5: node properties (empty, position, local neighbor stats, occupancy)
+            # Node properties (ALL snaps)
+            # ---------------------------
+
+                # Occupancy (ALL snaps)
+                if src_v == 0:
+                    graphs.add_graph_node_property(gid, src_name, "EMPTY")
+                elif src_v == 1:
+                    graphs.add_graph_node_property(gid, src_name, "P1")
+                else:
+                    graphs.add_graph_node_property(gid, src_name, "P2")
+
+                # Borders (ALL snaps) – critical for Hex winner logic
+                if r == 0:
+                    graphs.add_graph_node_property(gid, src_name, "TOP")
+                if r == size - 1:
+                    graphs.add_graph_node_property(gid, src_name, "BOTTOM")
+                if c == 0:
+                    graphs.add_graph_node_property(gid, src_name, "LEFT")
+                if c == size - 1:
+                    graphs.add_graph_node_property(gid, src_name, "RIGHT")
+
+                # Position (ALL snaps) – strongly recommended for 5x5
+                graphs.add_graph_node_property(gid, src_name, f"ROW_{r}")
+                graphs.add_graph_node_property(gid, src_name, f"COL_{c}")
+
+                # Local neighbor statistics (ONLY snap 2/5, as required)
                 if snap in (2, 5):
-                    if src_v == 0:
-                        graphs.add_graph_node_property(gid, src_name, "EMPTY")
-                    elif src_v == 1:
-                        graphs.add_graph_node_property(gid, src_name, "P1")
-                    else:
-                        graphs.add_graph_node_property(gid, src_name, "P2")
-
-                    graphs.add_graph_node_property(gid, src_name, f"ROW_{r}")
-                    graphs.add_graph_node_property(gid, src_name, f"COL_{c}")
-
-                    # neighbor stats
                     n_p1 = n_p2 = n_e = 0
                     for rr, cc in nbrs[src_idx]:
                         v = int(board[rr * size + cc])
@@ -289,9 +329,11 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                             n_p1 += 1
                         else:
                             n_p2 += 1
+
                     graphs.add_graph_node_property(gid, src_name, f"N_P1_{n_p1}")
                     graphs.add_graph_node_property(gid, src_name, f"N_P2_{n_p2}")
                     graphs.add_graph_node_property(gid, src_name, f"N_E_{n_e}")
+
 
                 # edges (required)
                 for rr, cc in nbrs[src_idx]:
@@ -355,8 +397,9 @@ def train_and_eval_for_snap(
     rng = random.Random(seed + snap)
 
     # Generate games
-    train_games = [generate_random_game(size, rng) for _ in range(n_train)]
-    test_games = [generate_random_game(size, rng) for _ in range(n_test)]
+    train_games = generate_games_from_hex_c("./hex5", n_train)
+    test_games = generate_games_from_hex_c("./hex5", n_test)
+
 
     # Build boards at snap
     X_train = np.stack([board_at_snap(g, size, snap) for g in train_games], axis=0)

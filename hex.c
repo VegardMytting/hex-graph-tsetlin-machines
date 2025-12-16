@@ -297,73 +297,52 @@ void write_board_csv(FILE *f, int board[], int winner) {
   fprintf(f, "%d\n", winner);
 }
 
-int main(void) {
-  srand((unsigned)time(NULL));
-
-  MKDIR("data");
-
-  char file_final[256];
-  char file_m2[256];
-  char file_m5[256];
-
-  snprintf(file_final, sizeof(file_final), "data/hex_%dx%d_%d_final.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
-
-  snprintf(file_m2, sizeof(file_m2), "data/hex_%dx%d_%d_minus2.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
-
-  snprintf(file_m5, sizeof(file_m5), "data/hex_%dx%d_%d_minus5.csv", BOARD_DIM, BOARD_DIM, NUM_GAMES);
-
-  FILE *f_final = fopen(file_final, "w");
-  FILE *f_m2 = fopen(file_m2, "w");
-  FILE *f_m5 = fopen(file_m5, "w");
-
-  if (!f_final || !f_m2 || !f_m5) {
-    perror("Failed to open output files");
-    return 1;
-  }
-
-  write_csv_header(f_final);
-  write_csv_header(f_m2);
-  write_csv_header(f_m5);
-
-  struct hex_game hg;
-  int temp_board[(BOARD_DIM+2)*(BOARD_DIM+2)*2];
-
-  for (int g = 0; g < NUM_GAMES; ++g) {
-    hg_init(&hg);
-
-    int winner = 0;
-    int player = 0;
-    int total_moves = 0;
-
-    while (hg.number_of_open_positions > 0) {
-      int pos = hg_place_piece_randomly(&hg, player);
-      total_moves++;
-
-      if (hg_winner(&hg, player, pos)) {
- 				winner = (player == 0) ? 1 : -1;
- 				break;
-      }
-
-      player = 1 - player;
-    }
-
-    reconstruct_board(temp_board, hg.moves, total_moves);
-    write_board_csv(f_final, temp_board, winner);
-
-    if (total_moves >= 2) {
-      reconstruct_board(temp_board, hg.moves, total_moves - 2);
-      write_board_csv(f_m2, temp_board, winner);
-    }
-
-    if (total_moves >= 5) {
-      reconstruct_board(temp_board, hg.moves, total_moves - 5);
-      write_board_csv(f_m5, temp_board, winner);
-    }
-  }
-
-  fclose(f_final);
-  fclose(f_m2);
-  fclose(f_m5);
-
-  return 0;
+static inline int padded_to_flat(int pos) {
+    int r = pos / (BOARD_DIM + 2);      // 0..BOARD_DIM+1
+    int c = pos % (BOARD_DIM + 2);      // 0..BOARD_DIM+1
+    // playable cells are r=1..BOARD_DIM, c=1..BOARD_DIM
+    int rr = r - 1;                      // 0..BOARD_DIM-1
+    int cc = c - 1;                      // 0..BOARD_DIM-1
+    return rr * BOARD_DIM + cc;          // 0..BOARD_DIM*BOARD_DIM-1
 }
+
+
+int main(int argc, char **argv) {
+    struct hex_game hg;
+
+    int n_games = 10000;
+    if (argc > 1) n_games = atoi(argv[1]);
+
+    // enkel seed (kan forbedres)
+    srand(1);
+
+    for (int game = 0; game < n_games; ++game) {
+        hg_init(&hg);
+
+        int winner = -1;
+        int player = 0;
+
+        while (!hg_full_board(&hg)) {
+            int position = hg_place_piece_randomly(&hg, player);
+
+            if (hg_winner(&hg, player, position)) {
+                winner = player; // 0 eller 1
+                break;
+            }
+            player = 1 - player;
+        }
+
+        int moves_played = BOARD_DIM*BOARD_DIM - hg.number_of_open_positions;
+
+        // Print: winner,m0,m1,...,m_(moves_played-1)
+        // Winner: 0=Player1, 1=Player2 (eller omvendt; men hold konsistent i Python)
+        printf("%d", winner);
+        for (int i = 0; i < moves_played; ++i) {
+            printf(",%d", padded_to_flat(hg.moves[i]));
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+
