@@ -269,10 +269,12 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
         for c in range(size):
             nbrs.append(hex_neighbors(size, r, c))
 
+    add_adj = (snap in (2, 5))
+
     # Edge count per node depends on snap:
     # - We always add 1 directed edge per neighbor (6 max) with a state-dependent edge-type.
     # - For snap 2/5 we also add unconditional "ADJ" edges per neighbor (same multiplicity).
-    per_node_edges = [len(nbrs[i]) * (2 if snap in (2, 5) else 1) for i in range(node_count)]
+    per_node_edges = [len(nbrs[i]) * (1 + int(add_adj)) for i in range(node_count)]
 
     # Add nodes
     for gid in range(n):
@@ -336,6 +338,7 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
 
 
                 # edges (required)
+                # edges (required)
                 for rr, cc in nbrs[src_idx]:
                     dst_name = f"{rr}:{cc}"
                     dst_v = int(board[rr * size + cc])
@@ -344,7 +347,6 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                     if dst_v == 0:
                         et = "EMPTY_CONN"
                     else:
-                        # If src is empty, treat P1/P2 as direct types (works better than inventing a new type).
                         if src_v == 0:
                             et = "P1_CONN" if dst_v == 1 else "P2_CONN"
                         else:
@@ -353,7 +355,13 @@ def build_graphs_from_boards(boards: np.ndarray, size: int, snap: int, hypervect
                             else:
                                 et = "OPP_CONN"
 
+                    # 1) alltid én “state edge” per nabo
                     graphs.add_graph_node_edge(gid, src_name, dst_name, et)
+
+                    # 2) i tillegg: én ADJ per nabo når snap=2/5
+                    if add_adj:
+                        graphs.add_graph_node_edge(gid, src_name, dst_name, "ADJ")
+
 
                     # ALWAYS add occupancy and border info
                     if src_v == 0:
