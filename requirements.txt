@@ -1,3 +1,4 @@
+GraphTsetlinMachine
 numba
 pycuda
 tqdm

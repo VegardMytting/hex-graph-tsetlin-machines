@@ -692,7 +692,7 @@ class CommonTsetlinMachine():
 
 		class_sum = np.zeros(self.number_of_outputs).astype(np.int32)
 		for epoch in tqdm(range(epochs), desc=("epoch" if epochs == 1 else "epochs"), leave=False, disable=(True if epochs <= 1 else False)):
-			for e in tqdm(range(graphs.number_of_graphs), desc="training...", leave=False):
+			for e in tqdm(range(graphs.number_of_graphs), desc="training...", leave=False, disable=True): # set 'disable = False' to use the progressbar
 				class_sum[:] = 0
 				cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
