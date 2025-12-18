@@ -13,8 +13,6 @@ This project trains and evaluates a Multi-Class Graph Tsetlin Machine (GTM) to p
     ├── Makefile
     └── README.md
 
-
-
 ## Requirements
 
 To install required Python packages:
@@ -37,9 +35,9 @@ This will generate CSV files in the `data/` directory with the name scheme:
 
 Example:
 
-hex_7x7_1000000_final.csv
-hex_7x7_1000000_minus2.csv
-hex_7x7_1000000_minus5.csv
+- hex_7x7_1000000_final.csv
+- hex_7x7_1000000_minus2.csv
+- hex_7x7_1000000_minus5.csv
 
 ### Scenarios
 - `final` - Final board state
