@@ -188,7 +188,6 @@ def hex_neighbors(i: int, j: int, n: int):
         if 0 <= ni < n and 0 <= nj < n:
             yield ni, nj
 
-
 def random_subsample_indices(n: int, k: int, seed: int) -> np.ndarray:
     rng = np.random.default_rng(seed)
     if k >= n:
@@ -202,7 +201,6 @@ def train_test_split_indices(n: int, train_ratio: float, seed: int) -> tuple[np.
     rng.shuffle(idx)
     split = int(n * train_ratio)
     return idx[:split], idx[split:]
-
 
 def balance_train_only(X: np.ndarray, y: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray]:
     rng = np.random.default_rng(seed)
@@ -586,13 +584,12 @@ def train_and_evaluate(board_size: int, args):
         })
 
         print(f"\nScenario: {scenario}")
-        print(f"  Acc: {test_acc:.2f}%  (X: {x_acc:.2f}%, O: {o_acc:.2f}%)")
-        print(f"  Pred counts: X={x_preds} O={o_preds}")
-        print(f"  y_pos(Xwins)={diag['y_pos']:.3f} pred_pos(Xwins)={diag['pred_pos']:.3f} maj_base={diag['maj_base']:.2f}%")
+        print(f"\tAcc: {test_acc:.2f}%  (X: {x_acc:.2f}%, O: {o_acc:.2f}%)")
+        print(f"\tPred counts: X={x_preds} O={o_preds}")
+        print(f"\ty_pos(Xwins)={diag['y_pos']:.3f} pred_pos(Xwins)={diag['pred_pos']:.3f} maj_base={diag['maj_base']:.2f}%")
 
-    pd.DataFrame(eval_rows).to_csv(os.path.join(args.results_dir, f"evaluation_{board_size}x{board_size}.csv"), index=False)
+    pd.DataFrame(eval_rows).to_csv(os.path.join(args.results_dir, f"evaluation_{board_size}x{board_size}_{args.train_on}.csv"), index=False)
     return results
-
 
 def main():
     parser = argparse.ArgumentParser(description="Hex Winner Prediction with GTM (Improved Learning)")
