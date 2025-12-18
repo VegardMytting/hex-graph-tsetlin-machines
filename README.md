@@ -45,7 +45,7 @@ Example:
 - `minus5` - Board with last 5 moves removed
 
 > [!CAUTION]
-All board sizes and scenarios you want to train on **must exist** in `data/`
+All board sizes and scenarios you want to train on **must exist** in the `data/` directory!
 
 ## Running the Program
 
