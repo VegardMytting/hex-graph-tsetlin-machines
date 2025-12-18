@@ -3,16 +3,6 @@
 
 This project trains and evaluates a Multi-Class Graph Tsetlin Machine (GTM) to predict the winner of a Hex game from board states. The system supports **multiple board sizes**, **different game-end scenarios**, **and large-scale datasets**.
 
-## Project Structure
-
-    ├── main.py
-    ├── hex.c
-    ├── requirements.txt
-    ├── data/
-    ├── results/
-    ├── Makefile
-    └── README.md
-
 ## Requirements
 
 To install required Python packages:
